@@ -61,7 +61,7 @@ export function ConsolePage() {
    */
   const apiKey = LOCAL_RELAY_SERVER_URL
     ? ''
-    : localStorage.getItem('tmp::voice_api_key') ||
+    : process.env.REACT_OPENAI_KEY || localStorage.getItem('tmp::voice_api_key') ||
       prompt('OpenAI API Key') ||
       '';
   if (apiKey !== '') {
@@ -528,10 +528,10 @@ export function ConsolePage() {
     <div data-component="ConsolePage">
       <div className="content-top">
         <div className="content-title">
-          <img src="/openai-logomark.svg" />
-          <span>realtime console</span>
+          <img src="/whale-icon.svg" />
+          <span>Speak with Moby</span>
         </div>
-        <div className="content-api-key">
+        {/* <div className="content-api-key">
           {!LOCAL_RELAY_SERVER_URL && (
             <Button
               icon={Edit}
@@ -541,7 +541,7 @@ export function ConsolePage() {
               onClick={() => resetAPIKey()}
             />
           )}
-        </div>
+        </div> */}
       </div>
       <div className="content-main">
         <div className="content-logs">
@@ -684,12 +684,12 @@ export function ConsolePage() {
             </div>
           </div>
           <div className="content-actions">
-            <Toggle
+            {/* <Toggle
               defaultValue={false}
               labels={['manual', 'vad']}
               values={['none', 'server_vad']}
               onChange={(_, value) => changeTurnEndType(value)}
-            />
+            /> */}
             <div className="spacer" />
             {isConnected && canPushToTalk && (
               <Button
@@ -712,7 +712,7 @@ export function ConsolePage() {
             />
           </div>
         </div>
-        <div className="content-right">
+        {/* <div className="content-right">
           <div className="content-block map">
             <div className="content-block-title">get_weather()</div>
             <div className="content-block-title bottom">
@@ -745,7 +745,7 @@ export function ConsolePage() {
               {JSON.stringify(memoryKv, null, 2)}
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
