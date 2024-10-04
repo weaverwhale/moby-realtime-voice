@@ -61,7 +61,7 @@ export function ConsolePage() {
    */
   const apiKey = LOCAL_RELAY_SERVER_URL
     ? ''
-    : process.env.REACT_OPENAI_KEY || localStorage.getItem('tmp::voice_api_key') ||
+    : process.env.REACT_APP_OPENAI_KEY || localStorage.getItem('tmp::voice_api_key') ||
       prompt('OpenAI API Key') ||
       '';
   if (apiKey !== '') {
