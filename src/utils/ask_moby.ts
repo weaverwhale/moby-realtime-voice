@@ -1,4 +1,4 @@
-const SHOP_ID = process.env.SHOP_ID || 'madisonbraids.myshopify.com';
+const SHOP_ID = process.env.REACT_APP_SHOP_ID || 'madisonbraids.myshopify.com';
 
 export const askMoby = async (question: string, shopId?: string): Promise<boolean> => {
   const questionBody = {
@@ -18,7 +18,7 @@ export const askMoby = async (question: string, shopId?: string): Promise<boolea
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'x-api-key': process.env.API_KEY,
+        'x-api-key': process.env.REACT_APP_API_KEY,
       } as any,
       body: JSON.stringify(questionBody),
     }
