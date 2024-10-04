@@ -26,14 +26,13 @@ export default async function ask(req: Request, res: Response) {
       }
     ).then(res => res.json());
     
-    return new Response(JSON.stringify(data), {
-      headers: { 'content-type': 'application/json' },
-    });
+    return Response.json(data);
 
-  } catch {
-    return new Response(JSON.stringify({ error: 'Failed to ask Moby' }), {
+  } catch (e) {
+    return Response.json({
       status: 500,
       headers: { 'content-type': 'application/json' },
+      error: 'Failed to ask Moby'
     });
   }
 }
