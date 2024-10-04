@@ -1,5 +1,9 @@
 # OpenAI Realtime Console
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/74baa0ba-d71f-4445-aed7-f81422649fef/deploy-status)](https://app.netlify.com/sites/ornate-syrniki-409dc5/deploys)
+
+[Demo site](speak-with-moby.netlify.app)
+
 The OpenAI Realtime Console is intended as an inspector and interactive API reference
 for the OpenAI Realtime API. It comes packaged with two utility libraries,
 [openai/openai-realtime-api-beta](https://github.com/openai/openai-realtime-api-beta)
