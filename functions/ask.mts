@@ -1,3 +1,5 @@
+import crypto from 'crypto'
+
 export default async function ask(req: Request, res: Response) {
   try {
     const body = await req.json()
@@ -7,7 +9,7 @@ export default async function ask(req: Request, res: Response) {
       stream: false,
       source: 'chat',
       userId: 'ceVJVYVQaRQj2un0fCJFXUnFwIE3',
-      shopId: shopId || process.env.SHOP_ID,
+      shopId: shopId || process.env.SHOP_ID || 'madisonbraids.myshopify.com',
       messageId: crypto.randomUUID(),
       conversationId: crypto.randomUUID(),
       question: question,
