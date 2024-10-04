@@ -29,8 +29,9 @@ export default async function ask(req: Request, res: Response) {
     return Response.json(data);
 
   } catch (e) {
+    console.log(e)
     return Response.json({
-      status: 500,
+      code: 500,
       headers: { 'content-type': 'application/json' },
       error: 'Failed to ask Moby'
     });
