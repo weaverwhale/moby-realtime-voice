@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "name": "Frontend service",
+      "port": 62345,
+      "restart": true,
+      "request": "attach",
+      "sourceMaps": true,
+      "timeout": 600000,
+      "remoteRoot": "/usr/src/app/dist/",
+      "localRoot": "${workspaceFolder}/services/frontend/dist/"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "eslint.enable": true,
+  "eslint.format.enable": true,
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.lintTask.enable": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "git.ignoreSubmodules": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "tailwindCSS.experimental.classRegex": [["cx([^;]*);", "'([^']*)'"]],
+  "workbench.colorCustomizations": {
+    "sash.hoverBorder": "#aecdd6",
+    "titleBar.activeBackground": "#61dafc",
+    "titleBar.activeForeground": "#15201f",
+    "titleBar.inactiveBackground": "#60d9fb",
+    "titleBar.inactiveForeground": "#14202c"
+  }
+}
