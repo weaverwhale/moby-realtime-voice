@@ -1,4 +1,5 @@
-export const instructions = `System settings:
+export const instructions = `
+System settings:
 Tool use: enabled.
 
 Instructions:

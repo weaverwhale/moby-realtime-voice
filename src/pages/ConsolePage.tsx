@@ -22,7 +22,7 @@ import { WavRenderer } from '../utils/wav_renderer';
 import { X, Edit, Zap, ArrowUp, ArrowDown } from 'react-feather';
 import { Button } from '../components/button/Button';
 import { Toggle } from '../components/toggle/Toggle';
-import { Map } from '../components/Map';
+import { Map } from '../components/map/Map';
 import { askMoby } from '../utils/ask_moby';
 
 import './ConsolePage.scss';
@@ -61,7 +61,8 @@ export function ConsolePage() {
    */
   const apiKey = LOCAL_RELAY_SERVER_URL
     ? ''
-    : process.env.REACT_APP_OPENAI_KEY || localStorage.getItem('tmp::voice_api_key') ||
+    : process.env.REACT_APP_OPENAI_KEY ||
+      localStorage.getItem('tmp::voice_api_key') ||
       prompt('OpenAI API Key') ||
       '';
   if (apiKey !== '') {
@@ -112,6 +113,7 @@ export function ConsolePage() {
    */
   const [items, setItems] = useState<ItemType[]>([]);
   const [realtimeEvents, setRealtimeEvents] = useState<RealtimeEvent[]>([]);
+  const [debug, setDebug] = useState(false);
   const [expandedEvents, setExpandedEvents] = useState<{
     [key: string]: boolean;
   }>({});
@@ -144,18 +146,6 @@ export function ConsolePage() {
       return s;
     };
     return `${pad(m)}:${pad(s)}.${pad(hs)}`;
-  }, []);
-
-  /**
-   * When you click the API key
-   */
-  const resetAPIKey = useCallback(() => {
-    const apiKey = prompt('OpenAI API Key');
-    if (apiKey !== null) {
-      localStorage.clear();
-      localStorage.setItem('tmp::voice_api_key', apiKey);
-      window.location.reload();
-    }
   }, []);
 
   /**
@@ -461,7 +451,8 @@ export function ConsolePage() {
           properties: {
             shopId: {
               type: 'string',
-              description: 'the shopId of the store (eg: madisonbraids.myshopify.com)',
+              description:
+                'the shopId of the store (eg: madisonbraids.myshopify.com)',
             },
             question: {
               type: 'string',
@@ -472,9 +463,9 @@ export function ConsolePage() {
         },
       },
       async ({ shopId, question }: { [key: string]: any }) => {
-        return await askMoby(question, shopId)
+        return await askMoby(question, shopId);
       }
-    )
+    );
 
     // handle realtime events from client + server for event logging
     client.on('realtime.event', (realtimeEvent: RealtimeEvent) => {
@@ -542,6 +533,12 @@ export function ConsolePage() {
             />
           )}
         </div> */}
+        <Toggle
+          defaultValue={debug}
+          labels={['Chat', 'Debug']}
+          values={['chat', 'debug']}
+          onChange={(isEnabled) => setDebug(isEnabled ? true : false)}
+        />
       </div>
       <div className="content-main">
         <div className="content-logs">
@@ -554,134 +551,163 @@ export function ConsolePage() {
                 <canvas ref={serverCanvasRef} />
               </div>
             </div>
-            <div className="content-block-title">events</div>
-            <div className="content-block-body" ref={eventsScrollRef}>
-              {!realtimeEvents.length && `awaiting connection...`}
-              {realtimeEvents.map((realtimeEvent, i) => {
-                const count = realtimeEvent.count;
-                const event = { ...realtimeEvent.event };
-                if (event.type === 'input_audio_buffer.append') {
-                  event.audio = `[trimmed: ${event.audio.length} bytes]`;
-                } else if (event.type === 'response.audio.delta') {
-                  event.delta = `[trimmed: ${event.delta.length} bytes]`;
-                }
-                return (
-                  <div className="event" key={event.event_id}>
-                    <div className="event-timestamp">
-                      {formatTime(realtimeEvent.time)}
-                    </div>
-                    <div className="event-details">
-                      <div
-                        className="event-summary"
-                        onClick={() => {
-                          // toggle event details
-                          const id = event.event_id;
-                          const expanded = { ...expandedEvents };
-                          if (expanded[id]) {
-                            delete expanded[id];
-                          } else {
-                            expanded[id] = true;
-                          }
-                          setExpandedEvents(expanded);
-                        }}
-                      >
-                        <div
-                          className={`event-source ${
-                            event.type === 'error'
-                              ? 'error'
-                              : realtimeEvent.source
-                          }`}
-                        >
-                          {realtimeEvent.source === 'client' ? (
-                            <ArrowUp />
-                          ) : (
-                            <ArrowDown />
+            {debug ? (
+              <>
+                <div className="content-block-title">events</div>
+                <div className="content-block-body" ref={eventsScrollRef}>
+                  {!realtimeEvents.length && `awaiting connection...`}
+                  {realtimeEvents.map((realtimeEvent, i) => {
+                    const count = realtimeEvent.count;
+                    const event = { ...realtimeEvent.event };
+                    if (event.type === 'input_audio_buffer.append') {
+                      event.audio = `[trimmed: ${event.audio.length} bytes]`;
+                    } else if (event.type === 'response.audio.delta') {
+                      event.delta = `[trimmed: ${event.delta.length} bytes]`;
+                    }
+                    return (
+                      <div className="event" key={event.event_id}>
+                        <div className="event-timestamp">
+                          {formatTime(realtimeEvent.time)}
+                        </div>
+                        <div className="event-details">
+                          <div
+                            className="event-summary"
+                            onClick={() => {
+                              // toggle event details
+                              const id = event.event_id;
+                              const expanded = { ...expandedEvents };
+                              if (expanded[id]) {
+                                delete expanded[id];
+                              } else {
+                                expanded[id] = true;
+                              }
+                              setExpandedEvents(expanded);
+                            }}
+                          >
+                            <div
+                              className={`event-source ${
+                                event.type === 'error'
+                                  ? 'error'
+                                  : realtimeEvent.source
+                              }`}
+                            >
+                              {realtimeEvent.source === 'client' ? (
+                                <ArrowUp />
+                              ) : (
+                                <ArrowDown />
+                              )}
+                              <span>
+                                {event.type === 'error'
+                                  ? 'error!'
+                                  : realtimeEvent.source}
+                              </span>
+                            </div>
+                            <div className="event-type">
+                              {event.type}
+                              {count && ` (${count})`}
+                            </div>
+                          </div>
+                          {!!expandedEvents[event.event_id] && (
+                            <div className="event-payload">
+                              {JSON.stringify(event, null, 2)}
+                            </div>
                           )}
-                          <span>
-                            {event.type === 'error'
-                              ? 'error!'
-                              : realtimeEvent.source}
-                          </span>
-                        </div>
-                        <div className="event-type">
-                          {event.type}
-                          {count && ` (${count})`}
                         </div>
                       </div>
-                      {!!expandedEvents[event.event_id] && (
-                        <div className="event-payload">
-                          {JSON.stringify(event, null, 2)}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <div className="content-block conversation">
-            <div className="content-block-title">conversation</div>
-            <div className="content-block-body" data-conversation-content>
-              {!items.length && `awaiting connection...`}
-              {items.map((conversationItem, i) => {
-                return (
-                  <div className="conversation-item" key={conversationItem.id}>
-                    <div className={`speaker ${conversationItem.role || ''}`}>
-                      <div>
-                        {(
-                          conversationItem.role || conversationItem.type
-                        ).replaceAll('_', ' ')}
-                      </div>
-                      <div
-                        className="close"
-                        onClick={() =>
-                          deleteConversationItem(conversationItem.id)
-                        }
-                      >
-                        <X />
-                      </div>
-                    </div>
-                    <div className={`speaker-content`}>
-                      {/* tool response */}
-                      {conversationItem.type === 'function_call_output' && (
-                        <div>{conversationItem.formatted.output}</div>
-                      )}
-                      {/* tool call */}
-                      {!!conversationItem.formatted.tool && (
-                        <div>
-                          {conversationItem.formatted.tool.name}(
-                          {conversationItem.formatted.tool.arguments})
-                        </div>
-                      )}
-                      {!conversationItem.formatted.tool &&
-                        conversationItem.role === 'user' && (
-                          <div>
-                            {conversationItem.formatted.transcript ||
-                              (conversationItem.formatted.audio?.length
-                                ? '(awaiting transcript)'
-                                : conversationItem.formatted.text ||
-                                  '(item sent)')}
+                    );
+                  })}
+                </div>
+                <div className="content-block conversation">
+                  <div className="content-block-title">conversation</div>
+                  <div className="content-block-body" data-conversation-content>
+                    {!items.length && `awaiting connection...`}
+                    {items.map((conversationItem, i) => {
+                      return (
+                        <div
+                          className="conversation-item"
+                          key={conversationItem.id}
+                        >
+                          <div
+                            className={`speaker ${conversationItem.role || ''}`}
+                          >
+                            <div>
+                              {(
+                                conversationItem.role || conversationItem.type
+                              ).replaceAll('_', ' ')}
+                            </div>
+                            <div
+                              className="close"
+                              onClick={() =>
+                                deleteConversationItem(conversationItem.id)
+                              }
+                            >
+                              <X />
+                            </div>
                           </div>
-                        )}
-                      {!conversationItem.formatted.tool &&
-                        conversationItem.role === 'assistant' && (
-                          <div>
-                            {conversationItem.formatted.transcript ||
-                              conversationItem.formatted.text ||
-                              '(truncated)'}
+                          <div className={`speaker-content`}>
+                            {/* tool response */}
+                            {conversationItem.type ===
+                              'function_call_output' && (
+                              <div>{conversationItem.formatted.output}</div>
+                            )}
+                            {/* tool call */}
+                            {!!conversationItem.formatted.tool && (
+                              <div>
+                                {conversationItem.formatted.tool.name}(
+                                {conversationItem.formatted.tool.arguments})
+                              </div>
+                            )}
+                            {!conversationItem.formatted.tool &&
+                              conversationItem.role === 'user' && (
+                                <div>
+                                  {conversationItem.formatted.transcript ||
+                                    (conversationItem.formatted.audio?.length
+                                      ? '(awaiting transcript)'
+                                      : conversationItem.formatted.text ||
+                                        '(item sent)')}
+                                </div>
+                              )}
+                            {!conversationItem.formatted.tool &&
+                              conversationItem.role === 'assistant' && (
+                                <div>
+                                  {conversationItem.formatted.transcript ||
+                                    conversationItem.formatted.text ||
+                                    '(truncated)'}
+                                </div>
+                              )}
+                            {conversationItem.formatted.file && (
+                              <audio
+                                src={conversationItem.formatted.file.url}
+                                controls
+                              />
+                            )}
                           </div>
-                        )}
-                      {conversationItem.formatted.file && (
-                        <audio
-                          src={conversationItem.formatted.file.url}
-                          controls
-                        />
-                      )}
-                    </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              </>
+            ) : (
+              <div
+                className={
+                  'speaker ' + (isConnected ? 'speaker-connected' : '')
+                }
+              >
+                <svg viewBox="0 0 390.78 291.48">
+                  <g>
+                    <path
+                      d="m268.05,283.21c.51,4.5-3.13,8.26-7.63,8.26h-114.07c-4.4,0-7.83-3.43-7.83-7.83V124.63c0-4.07-3.1-7.5-7.17-8.13C107.33,112.76,30.23,93.87.43,10.36-1.3,5.53,2.34.13,7.47,0,32.33,0,92.84,0,93.78,0c71.31,3.13,124.82,48.75,146.35,110.73l.13-.13c17.92,51.66,25.75,144.52,27.79,172.61Z"
+                      fill="inherit"
+                    />
+                    <path
+                      d="m390.38,9.02c-28.09,80.82-85.85,99.58-119.23,106.57-3.56.56-6.99-1.6-7.93-5.03-10.63-37.62-25.42-58.22-44.62-75.99-3.25-3-3.13-8.26.64-10.63C241.71,9.08,269.45.08,304.07.05v-.05h79.77c4.7,0,8.13,4.63,6.53,9.02Z"
+                      fill="inherit"
+                    />
+                  </g>
+                </svg>
+              </div>
+            )}
           </div>
           <div className="content-actions">
             {/* <Toggle
@@ -693,8 +719,8 @@ export function ConsolePage() {
             <div className="spacer" />
             {isConnected && canPushToTalk && (
               <Button
-                label={isRecording ? 'release to send' : 'push to talk'}
-                buttonStyle={isRecording ? 'alert' : 'regular'}
+                label={isRecording ? 'Release to send' : 'Push to talk'}
+                buttonStyle={isRecording ? 'alert' : 'action'}
                 disabled={!isConnected || !canPushToTalk}
                 onMouseDown={startRecording}
                 onMouseUp={stopRecording}
@@ -702,7 +728,7 @@ export function ConsolePage() {
             )}
             <div className="spacer" />
             <Button
-              label={isConnected ? 'disconnect' : 'connect'}
+              label={isConnected ? 'Disconnect' : 'Start Talking'}
               iconPosition={isConnected ? 'end' : 'start'}
               icon={isConnected ? X : Zap}
               buttonStyle={isConnected ? 'regular' : 'action'}
