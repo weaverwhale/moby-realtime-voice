@@ -749,7 +749,7 @@ export function ConsolePage() {
             )}
             <div className="spacer" />
             <Button
-              label={isConnected ? 'Disconnect' : 'Start Talking'}
+              label={isConnected ? 'Disconnect' : 'Start'}
               iconPosition={isConnected ? 'end' : 'start'}
               icon={isConnected ? X : Zap}
               buttonStyle={isConnected ? 'regular' : 'action'}
