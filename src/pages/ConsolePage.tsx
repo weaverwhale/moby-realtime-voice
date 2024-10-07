@@ -120,6 +120,8 @@ export function ConsolePage() {
   const [isConnected, setIsConnected] = useState(false);
   const [canPushToTalk, setCanPushToTalk] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
+  const [soundLevel, setSoundLevel] = useState(0);
+  const [isThinking, setIsThinking] = useState(false);
   const [memoryKv, setMemoryKv] = useState<{ [key: string]: any }>({});
   const [coords, setCoords] = useState<Coordinates | null>({
     lat: 37.775593,
@@ -297,6 +299,7 @@ export function ConsolePage() {
     let serverCtx: CanvasRenderingContext2D | null = null;
 
     const render = () => {
+      let localMax = 0;
       if (isLoaded) {
         if (clientCanvas) {
           if (!clientCanvas.width || !clientCanvas.height) {
@@ -313,11 +316,12 @@ export function ConsolePage() {
               clientCanvas,
               clientCtx,
               result.values,
-              '#0099ff',
+              '#009900',
               10,
               0,
               8
             );
+            localMax = Math.max(localMax, ...result.values);
           }
         }
         if (serverCanvas) {
@@ -335,13 +339,15 @@ export function ConsolePage() {
               serverCanvas,
               serverCtx,
               result.values,
-              '#009900',
+              '#0099ff',
               10,
               0,
               8
             );
+            localMax = Math.max(localMax, ...result.values);
           }
         }
+        setSoundLevel(localMax);
         window.requestAnimationFrame(render);
       }
     };
@@ -463,7 +469,10 @@ export function ConsolePage() {
         },
       },
       async ({ shopId, question }: { [key: string]: any }) => {
-        return await askMoby(question, shopId);
+        setIsThinking(true);
+        const answer = await askMoby(question, shopId);
+        setIsThinking(false);
+        return answer;
       }
     );
 
@@ -691,9 +700,21 @@ export function ConsolePage() {
             ) : (
               <div
                 className={
-                  'speaker ' + (isConnected ? 'speaker-connected' : '')
+                  'speaker ' +
+                  (isConnected ? 'speaker-connected ' : '') +
+                  (isThinking ? 'ai-thinking ' : '')
                 }
               >
+                <div
+                  className={
+                    'chat-bubble ' +
+                    (isRecording ? 'user-speaking ' : 'ai-speaking ')
+                  }
+                  style={{
+                    width: `${soundLevel * 35}vw`,
+                    height: `${soundLevel * 35}vw`,
+                  }}
+                ></div>
                 <svg viewBox="0 0 390.78 291.48">
                   <g>
                     <path

@@ -28,6 +28,7 @@
   &.button-style-alert {
     background-color: #f00;
     color: #ececf1;
+
     &:hover:not([disabled]) {
       background-color: #f00;
     }
@@ -47,6 +48,7 @@
 
   &:hover:not([disabled]) {
     background-color: #0a5ecc;
+    color: #ececf1;
   }
 
   &:active:not([disabled]) {
